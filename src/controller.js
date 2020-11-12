@@ -41,6 +41,8 @@ class Controller {
     for(let name in Game.spawns) {
       try {
         const spawn = Game.spawns[name]
+        if(!Memory.spawns[name])
+          Memory.spawns[name] = {}
         spawn.memory = Memory.spawns[name]
         ControllerSpawn.run(spawn)
       } catch(e) {
