@@ -38,6 +38,9 @@ class FinateStateMachine {
     const spec = this.allStates().find(s => s.name == this.state)
     this.trigger("", spec)
 
+    if(typeof this.onAny == "function")
+      return this.onAny.call(this.handler, this)
+
     if(Memory.debug.fsm.visual && this.ctx.room instanceof Room && this.ctx.pos instanceof RoomPosition) {
       this.ctx.room.visual.text(`${this.handler.name}:${this.state}`, this.ctx.pos, {
         color: 'white',
@@ -80,7 +83,7 @@ class FinateStateMachine {
   }
 
   transitions() {
-    return this._transitions.filter(t => t.from == this.state || t.from == "_any")
+    return this._transitions.filter(t => t.from == this.state || t.from == "any")
   }
 
   allTransitions() {
@@ -116,6 +119,8 @@ export default class FSM {
       fsm['on' + s.camelName] = this['on' + s.camelName]
       fsm['onEnter' + s.camelName] = this['onEnter' + s.camelName]
     })
+
+    fsm.onAny = this.onAny
 
     fsm.run()
   }
