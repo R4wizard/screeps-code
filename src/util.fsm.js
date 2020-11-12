@@ -80,7 +80,7 @@ class FinateStateMachine {
   }
 
   transitions() {
-    return this._transitions.filter(t => t.from == this.state)
+    return this._transitions.filter(t => t.from == this.state || t.from == "_any")
   }
 
   allTransitions() {
