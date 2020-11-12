@@ -11,9 +11,9 @@ export const loop = () => {
   const logBuffer = UtilConsole.flushBuffer()
   UtilConsole.stopBuffering()
 
-  const durationAvg = Memory.graphs.durations.reduce((acc, val) => acc + val, 0) / Memory.graphs.durations.length
-
   trackGraph("durations", duration)
+
+  const durationAvg = Memory.graphs.durations.reduce((acc, val) => acc + val, 0) / Memory.graphs.durations.length
   if(Game.time % 5 == 0)
     trackGraph("durationsAvg", durationAvg)
 
