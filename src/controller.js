@@ -1,6 +1,7 @@
 import Export from 'util.export'
 import Roles from 'roles'
 import { SpawnCounts } from 'roles'
+import ControllerSpawn from 'controller.spawn'
 import FactoryCreep from 'factory.creep'
 
 class Controller {
@@ -8,6 +9,7 @@ class Controller {
   static loop() {
     this.cleanUp()
     this.handleSpawning()
+    this.executeSpawns()
     this.executeRoles()
   }
 
@@ -15,8 +17,13 @@ class Controller {
     for(let name in Memory.creeps) {
       if(Game.creeps[name])
         continue
-
       delete Memory.creeps[name]
+    }
+
+    for(let name in Memory.spawns) {
+      if(Game.spawns[name])
+        continue
+      delete Memory.spawns[name]
     }
   }
 
@@ -25,6 +32,21 @@ class Controller {
       let count = _.filter(Game.creeps, creep => creep.memory.role == role).length
       if(count < SpawnCounts[role])
         return FactoryCreep.spawn(role)
+    }
+  }
+
+  static executeSpawns() {
+    if(!Memory.spawns) Memory.spawns = {}
+
+    for(let name in Game.spawns) {
+      try {
+        const spawn = Game.spawns[name]
+        spawn.memory = Memory.spawns[name]
+        ControllerSpawn.run(spawn)
+      } catch(e) {
+        console.log(`Exception when executing controller for spawn '${name}':`)
+        console.log(e.stack)
+      }
     }
   }
 
@@ -41,7 +63,7 @@ class Controller {
           console.log(`Warning: Creep ${creep.name} has an invalid role, set Memory.autoSuicide = true or resolve the issue manually.`)
         }
       } catch(e) {
-        console.log(`Exception when executing role for '${name}':`)
+        console.log(`Exception when executing role for creep '${name}':`)
         console.log(e.stack)
       }
     }
