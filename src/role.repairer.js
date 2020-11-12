@@ -6,23 +6,23 @@ import RoleBaseAToB from 'role.base.atob'
 class RoleRepairer extends RoleBaseAToB {
 
   static selectSource(fsm) {
-    return FindEnergyStorageOrSource(fsm.creep.room)
+    return FindEnergyStorageOrSource(fsm.ctx.room)
   }
 
   static selectDest(fsm) {
-    return RandomArray(fsm.creep.room.find(FIND_STRUCTURES, {
+    return RandomArray(fsm.ctx.room.find(FIND_STRUCTURES, {
       filter: object => (object.hits < object.hitsMax) && object.hits / object.hitsMax < 0.5
     }))
   }
 
   static handleCollect(fsm, target) {
     if(target instanceof Source)
-      return fsm.creep.harvest(target)
-    return fsm.creep.withdraw(target, RESOURCE_ENERGY)
+      return fsm.ctx.harvest(target)
+    return fsm.ctx.withdraw(target, RESOURCE_ENERGY)
   }
 
   static handleDeliver(fsm, target) {
-    return fsm.creep.repair(target)
+    return fsm.ctx.repair(target)
   }
 
 }

@@ -6,28 +6,28 @@ import RoleBaseAToB from 'role.base.atob'
 class RoleClearer extends RoleBaseAToB {
 
   static selectSource(fsm) {
-    const ruins = fsm.creep.room.find(FIND_RUINS, {
+    const ruins = fsm.ctx.room.find(FIND_RUINS, {
       filter: object => object.store.getUsedCapacity(RESOURCE_ENERGY) > 0
     })
-    const tombstones = fsm.creep.room.find(FIND_TOMBSTONES, {
+    const tombstones = fsm.ctx.room.find(FIND_TOMBSTONES, {
       filter: object => object.store.getUsedCapacity(RESOURCE_ENERGY) > 0
     })
-    const dropped = fsm.creep.room.find(FIND_DROPPED_RESOURCES)
+    const dropped = fsm.ctx.room.find(FIND_DROPPED_RESOURCES)
     return RandomArrays(ruins, tombstones, dropped)
   }
 
   static selectDest(fsm) {
-    return FindEnergyStorage(fsm.creep.room)
+    return FindEnergyStorage(fsm.ctx.room)
   }
 
   static handleCollect(fsm, target) {
     if(target instanceof Ruin || target instanceof Tombstone)
-      return fsm.creep.withdraw(target, RESOURCE_ENERGY)
-    return fsm.creep.pickup(target)
+      return fsm.ctx.withdraw(target, RESOURCE_ENERGY)
+    return fsm.ctx.pickup(target)
   }
 
   static handleDeliver(fsm, target) {
-    return fsm.creep.transfer(target, RESOURCE_ENERGY)
+    return fsm.ctx.transfer(target, RESOURCE_ENERGY)
   }
 
 }

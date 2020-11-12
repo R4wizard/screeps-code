@@ -5,21 +5,21 @@ import RoleBaseAToB from 'role.base.atob'
 class RoleUpgrader extends RoleBaseAToB {
 
   static selectSource(fsm) {
-    return FindEnergyStorageOrSource(fsm.creep.room)
+    return FindEnergyStorageOrSource(fsm.ctx.room)
   }
 
   static selectDest(fsm) {
-    return fsm.creep.room.controller
+    return fsm.ctx.room.controller
   }
 
   static handleCollect(fsm, target) {
     if(target instanceof Source)
-      return fsm.creep.harvest(target)
-    return fsm.creep.withdraw(target, RESOURCE_ENERGY)
+      return fsm.ctx.harvest(target)
+    return fsm.ctx.withdraw(target, RESOURCE_ENERGY)
   }
 
   static handleDeliver(fsm, target) {
-    return fsm.creep.upgradeController(target)
+    return fsm.ctx.upgradeController(target)
   }
 
 }

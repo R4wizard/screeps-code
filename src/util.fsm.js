@@ -2,15 +2,15 @@ import Export from 'util.export'
 
 class FinateStateMachine {
 
-  constructor(handler, creep) {
+  constructor(handler, ctx) {
     this.handler = handler
     this.machine = handler.machine
-    this.creep   = creep
+    this.ctx     = ctx
 
-    if(!this.creep.memory.state)
-      this.creep.memory.state = this.machine.init
+    if(!this.ctx.memory.state)
+      this.ctx.memory.state = this.machine.init
 
-    this.state = this.creep.memory.state
+    this.state = this.ctx.memory.state
 
     this._states = []
     this._transitions = this.machine.transitions
@@ -38,8 +38,8 @@ class FinateStateMachine {
     const spec = this.allStates().find(s => s.name == this.state)
     this.trigger("", spec)
 
-    if(Memory.debug.fsm.visual) {
-      this.creep.room.visual.text(`${this.handler.name}:${this.state}`, this.creep.pos, {
+    if(Memory.debug.fsm.visual && this.ctx.room instanceof Room && this.ctx.pos instanceof RoomPosition) {
+      this.ctx.room.visual.text(`${this.handler.name}:${this.state}`, this.ctx.pos, {
         color: 'white',
         backgroundColor: '#000000',
         backgroundPadding: 0.1,
@@ -52,7 +52,7 @@ class FinateStateMachine {
   transition(transition) {
     const spec = this.transitions().find(t => t.name == transition)
     if(!spec)
-      throw new Error(`Cannot use transition '${transition}' from state '${this.creep.memory.state}'.`)
+      throw new Error(`Cannot use transition '${transition}' from state '${this.ctx.memory.state}'.`)
 
     const to = this._states.find(s => s.name == spec.to)
     const from = this._states.find(s => s.name == spec.from)
@@ -61,7 +61,7 @@ class FinateStateMachine {
     this.trigger("Leave", from)
 
     this.state = spec.to
-    this.creep.memory.state = spec.to
+    this.ctx.memory.state = spec.to
 
     this.trigger("Enter", to)
     this.trigger("After", spec)
@@ -94,7 +94,7 @@ class FinateStateMachine {
   trigger(eventName, spec) {
     if(typeof this[`on${eventName}${spec.camelName}`] == "function") {
       if(Memory.debug.fsm.events)
-        console.log(`  ${this.creep.name}: on${eventName}${spec.camelName}`)
+        console.log(`  ${this.ctx.name}: on${eventName}${spec.camelName}`)
       return this[`on${eventName}${spec.camelName}`].call(this.handler, this)
     }
   }
@@ -103,8 +103,8 @@ class FinateStateMachine {
 
 export default class FSM {
 
-  static run(creep) {
-    const fsm = new FinateStateMachine(this, creep)
+  static run(ctx) {
+    const fsm = new FinateStateMachine(this, ctx)
 
     fsm.allTransitions().forEach(t => {
       fsm['onBefore' + t.camelName] = this['onBefore' + t.camelName]

@@ -6,15 +6,15 @@ import RoleBaseAToB from 'role.base.atob'
 class RoleBuilder extends RoleBaseAToB {
 
   static selectSource(fsm) {
-    return FindEnergyStorageOrSource(fsm.creep.room)
+    return FindEnergyStorageOrSource(fsm.ctx.room)
   }
 
   static selectDest(fsm) {
-    const selectedSite = Game.getObjectById(fsm.creep.memory.site)
+    const selectedSite = Game.getObjectById(fsm.ctx.memory.site)
     if(selectedSite)
       return selectedSite
 
-    const sites = fsm.creep.room.find(FIND_CONSTRUCTION_SITES)
+    const sites = fsm.ctx.room.find(FIND_CONSTRUCTION_SITES)
     if(sites.length == 0)
       return
 
@@ -24,18 +24,18 @@ class RoleBuilder extends RoleBaseAToB {
       return aPercent > bPercent ? -1 : 1
     })
 
-    fsm.creep.memory.site = sites[0].id
+    fsm.ctx.memory.site = sites[0].id
     return sites[0]
   }
 
   static handleCollect(fsm, target) {
     if(target instanceof Source)
-      return fsm.creep.harvest(target)
-    return fsm.creep.withdraw(target, RESOURCE_ENERGY)
+      return fsm.ctx.harvest(target)
+    return fsm.ctx.withdraw(target, RESOURCE_ENERGY)
   }
 
   static handleDeliver(fsm, target) {
-    return fsm.creep.build(target)
+    return fsm.ctx.build(target)
   }
 
 }

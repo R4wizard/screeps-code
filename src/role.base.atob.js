@@ -28,7 +28,7 @@ class RoleBaseAToB extends FSM {
   }
 
   static onIdle(fsm) {
-    fsm.creep.moveTo(Game.flags.FlagIdle, {visualizePathStyle: {stroke: 'yellow'}})
+    fsm.ctx.moveTo(Game.flags.FlagIdle, {visualizePathStyle: {stroke: 'yellow'}})
     fsm.travelSource()
   }
 
@@ -36,21 +36,21 @@ class RoleBaseAToB extends FSM {
     const source = this.selectSource(fsm)
     if(source == undefined)
       return fsm.noValidSource()
-    fsm.creep.memory.target = source.id
+    fsm.ctx.memory.target = source.id
   }
 
   static onTravellingSource(fsm) {
-    const target = Game.getObjectById(fsm.creep.memory.target)
+    const target = Game.getObjectById(fsm.ctx.memory.target)
     if(target == undefined)
       return fsm.noValidSource()
-    if(fsm.creep.pos.isNearTo(target))
+    if(fsm.ctx.pos.isNearTo(target))
       return fsm.collect()
-    fsm.creep.moveTo(target, {visualizePathStyle: {stroke: '#ffaa00'}})
+    fsm.ctx.moveTo(target, {visualizePathStyle: {stroke: '#ffaa00'}})
   }
 
   static onCollecting(fsm) {
-    const target = Game.getObjectById(fsm.creep.memory.target)
-    if(fsm.creep.store.getFreeCapacity() == 0)
+    const target = Game.getObjectById(fsm.ctx.memory.target)
+    if(fsm.ctx.store.getFreeCapacity() == 0)
       return fsm.travelDest()
 
     if(this.handleCollect(fsm, target) != OK)
@@ -61,21 +61,21 @@ class RoleBaseAToB extends FSM {
     const dest = this.selectDest(fsm)
     if(dest == undefined)
       return fsm.noValidDest()
-    fsm.creep.memory.target = dest.id
+    fsm.ctx.memory.target = dest.id
   }
 
   static onTravellingDest(fsm) {
-    const target = Game.getObjectById(fsm.creep.memory.target)
+    const target = Game.getObjectById(fsm.ctx.memory.target)
     if(target == undefined)
       return fsm.noValidDest()
-    if(fsm.creep.pos.isNearTo(target))
+    if(fsm.ctx.pos.isNearTo(target))
       return fsm.deliver()
-    fsm.creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}})
+    fsm.ctx.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}})
   }
 
   static onDelivering(fsm) {
-    const target = Game.getObjectById(fsm.creep.memory.target)
-    if(fsm.creep.store.getUsedCapacity() == 0)
+    const target = Game.getObjectById(fsm.ctx.memory.target)
+    if(fsm.ctx.store.getUsedCapacity() == 0)
       return fsm.idle()
 
     if(this.handleDeliver(fsm, target) != OK)
