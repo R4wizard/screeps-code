@@ -2,19 +2,34 @@ module.exports = function(grunt) {
   const config = require('./.screeps.json')
 
   grunt.initConfig({
-    clean: ['dist'],
+    clean: ['build'],
     babel: {
       options: {
-        sourceMap: true,
+        sourceMap: false,
         presets: ["@babel/preset-env"],
       },
-      dist: {
+      build: {
         files: [{
           expand: true,
           cwd: 'src/',
-          src: ['*.js'],
-          dest: 'dist/'
+          src: ['**/*.js'],
+          dest: 'build/dist/'
         }],
+      },
+    },
+    copy: {
+      flatten: {
+        files: [
+          {
+            expand: true,
+            src: ['build/dist/**'],
+            dest: 'build/flatten/',
+            filter: 'isFile',
+            rename: (dest, matchedSrcPath) => {
+              return matchedSrcPath.replace(/[\/\\]+/g, '.').replace(/^build\.dist\./, "build/flatten/")
+            },
+          }
+        ]
       },
     },
     screeps: {
@@ -30,13 +45,14 @@ module.exports = function(grunt) {
         ptr: config.ptr
       },
       dist: {
-        src: ['dist/*.js']
+        src: ['build/flatten/*.js']
       }
     }
   })
 
   grunt.loadNpmTasks('grunt-contrib-clean')
   grunt.loadNpmTasks('grunt-babel')
+  grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks('grunt-screeps')
-  grunt.registerTask("default", ["clean", "babel", "screeps"])
+  grunt.registerTask("default", ["clean", "babel", "copy", "screeps"])
 }
