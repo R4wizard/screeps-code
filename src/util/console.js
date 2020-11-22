@@ -6,7 +6,11 @@ export default {
   colors: ['#26C6DA', '#FF7043', '#78909C', '#2E78D2', '#006C7A', '#FFBEA9', '#FFBEA9', '#97BCE9', '#853A22'],
 
   startBuffering() {
-    console.log = (...args) => buffer.push(args.join(' '))
+    console.log = (...args) => {
+      for(let i = 0; i < args.length; i++)
+        args[i] = typeof args[i] == 'object' ? JSON.stringify(args[i]) : args[i]
+      buffer.push(args.join(' '))
+    }
   },
 
   stopBuffering() {

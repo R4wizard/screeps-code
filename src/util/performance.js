@@ -11,7 +11,8 @@ export default class UtilPerformance {
 
       const existing = obj[key]
       obj[key] = function() {
-        const measurement = stack[stack.length - 1].measure(`${title}:${key}()`)
+        const firstArg = arguments.length > 0 && typeof arguments[0] == "string" ? `"${arguments[0]}"` : ""
+        const measurement = stack[stack.length - 1].measure(`${title}:${key}(${firstArg})`)
         const result = existing.apply(this, arguments)
         measurement.stop()
         return result

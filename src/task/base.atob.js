@@ -1,7 +1,8 @@
 import Export from 'util.export'
 import FSM from 'util.fsm'
+import ControllerRoom from 'controller.room'
 
-class RoleBaseAToB extends FSM {
+class TaskBaseAToB extends FSM {
 
   static machine = {
     init: 'idle',
@@ -25,15 +26,27 @@ class RoleBaseAToB extends FSM {
       // Couldn't find a destination
       { name: 'noValidDest',   from: 'travellingDest',   to: 'idle' },
     ],
+    icons: {
+      idle: '❓',
+      travellingSource: '⬅️',
+      collecting: '📤',
+      travellingDest: '➡️',
+      delivering: '📥'
+    }
+  }
+
+  static onEnterIdle(fsm) {
+    const task = ControllerRoom.getTask(fsm.ctx.room, fsm.ctx.memory.taskId)
+    ControllerRoom.returnTask(fsm.ctx.room, task, fsm.ctx)
   }
 
   static onIdle(fsm) {
-    fsm.ctx.moveTo(Game.flags.FlagIdle, {visualizePathStyle: {stroke: 'yellow'}})
     fsm.travelSource()
   }
 
   static onEnterTravellingSource(fsm) {
-    const source = this.selectSource(fsm)
+    const task = ControllerRoom.getTask(fsm.ctx.room, fsm.ctx.memory.taskId)
+    const source = this.selectSource(fsm, task)
     if(source == undefined)
       return fsm.noValidSource()
     fsm.ctx.memory.target = source.id
@@ -45,43 +58,40 @@ class RoleBaseAToB extends FSM {
       return fsm.noValidSource()
     if(fsm.ctx.pos.isNearTo(target))
       return fsm.collect()
-    fsm.ctx.moveTo(target, {visualizePathStyle: {stroke: '#ffaa00'}})
+
+    fsm.ctx.travelTo(target, {visualizePathStyle: {stroke: '#ffaa00'}})
   }
 
   static onCollecting(fsm) {
+    const task = ControllerRoom.getTask(fsm.ctx.room, fsm.ctx.memory.taskId)
     const target = Game.getObjectById(fsm.ctx.memory.target)
     if(fsm.ctx.store.getFreeCapacity() == 0)
       return fsm.travelDest()
 
-    if(this.handleCollect(fsm, target) != OK)
+    if(this.handleCollect(fsm, target, task) != OK)
       return fsm.drainedSource()
   }
 
-  static onEnterTravellingDest(fsm) {
-    const dest = this.selectDest(fsm)
-    if(dest == undefined)
-      return fsm.noValidDest()
-    fsm.ctx.memory.target = dest.id
-  }
-
   static onTravellingDest(fsm) {
-    const target = Game.getObjectById(fsm.ctx.memory.target)
+    const task = ControllerRoom.getTask(fsm.ctx.room, fsm.ctx.memory.taskId)
+    const target = Game.getObjectById(task.target)
     if(target == undefined)
       return fsm.noValidDest()
     if(fsm.ctx.pos.isNearTo(target))
       return fsm.deliver()
-    fsm.ctx.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}})
+    fsm.ctx.travelTo(target, {visualizePathStyle: {stroke: '#ffffff'}})
   }
 
   static onDelivering(fsm) {
-    const target = Game.getObjectById(fsm.ctx.memory.target)
+    const task = ControllerRoom.getTask(fsm.ctx.room, fsm.ctx.memory.taskId)
+    const target = Game.getObjectById(task.target)
     if(fsm.ctx.store.getUsedCapacity() == 0)
       return fsm.idle()
 
-    if(this.handleDeliver(fsm, target) != OK)
+    if(this.handleDeliver(fsm, target, task) != OK)
       return fsm.filledTarget()
   }
 
 }
 
-export default Export(RoleBaseAToB)
+export default Export(TaskBaseAToB)

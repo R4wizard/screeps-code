@@ -5,7 +5,7 @@ export default () => {
   let second = NameList[Math.random() * NameList.length | 0]
   second = second.charAt(0).toUpperCase() + second.slice(1)
 
-  return `${first}${second}`
+  return `${first}${second}`.replace(/[^A-Za-z]+/, '')
 }
 
 export const NameList = [

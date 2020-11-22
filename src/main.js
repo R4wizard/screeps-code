@@ -2,8 +2,16 @@ import Controller from 'controller'
 import { SpawnCounts } from 'roles'
 import UtilPerformance from 'util.performance'
 import UtilConsole from 'util.console'
+import Traveler from 'util.traveler'
 
 export const loop = () => {
+  if(Memory.clearTasks) {
+    Object.values(Memory.rooms).forEach(r => r.tasks = [])
+    Object.values(Game.creeps).forEach(c => c.memory = {role: "fsm"})
+    Memory.clearTasks = false
+  }
+
+
   UtilPerformance.clear()
 
   UtilConsole.startBuffering()
@@ -17,17 +25,14 @@ export const loop = () => {
   if(Game.time % 5 == 0)
     trackGraph("durationsAvg", durationAvg)
 
-  if(Game.time % 5 == 0) {
-    for(let role in SpawnCounts) {
-      let count = _.filter(Game.creeps, creep => creep.memory.role == role).length
-      trackGraph("creeps_" + role, count)
-    }
-  }
+  if(Game.time % 5 == 0)
+    trackGraph("creeps", Object.keys(Game.creeps).length)
 
   if(!Memory.debug) {
     Memory.debug = {
       tick:  false,
       roles: false,
+      tasks: false,
       log:   false,
       performance: {
         depth:  0,
@@ -35,7 +40,8 @@ export const loop = () => {
       },
       fsm: {
         events: false,
-        visual: false,
+        track:  false,
+        icons:  false,
       },
     }
   }
@@ -52,7 +58,7 @@ export const loop = () => {
       GCL:         `${Game.gcl.level} (${gclProgress}%)`,
       GPL:         `${Game.gpl.level} (${gplProgress}%)`,
 
-      CPU:         `${Game.cpu.getUsed().toFixed(1)} / ${Game.cpu.tickLimit} (~${durationAvg.toFixed(1)})`,
+      CPU:         `${Game.cpu.getUsed().toFixed(1)} / ${Game.cpu.bucket} (~${durationAvg.toFixed(1)})`,
       Spawns:      Object.keys(Game.spawns).length,
       Rooms:       Object.keys(Game.rooms).length,
       Creeps:      Object.keys(Game.creeps).length,
@@ -64,30 +70,16 @@ export const loop = () => {
     }
     consoleChunk("Tick Data", () => {
       UtilConsole.table(tickData)
-    })
-  }
-
-  if(Memory.debug.roles == true) {
-      const creepRoles = {}
-      const creepGraphs = []
-      for(let role in SpawnCounts) {
-        let count = _.filter(Game.creeps, creep => creep.memory.role == role).length
-        creepRoles[role] = `${count} / ${SpawnCounts[role]}`
-        creepGraphs.push(Memory.graphs["creeps_" + role])
-      }
-
-      consoleChunk("Roles", () => {
-        console.log()
-        UtilConsole.plot(creepGraphs, {
-          unit: "creeps",
-          unitScale: 0,
-          height: 4,
-          colors: UtilConsole.colors,
-          alternate: true,
-        })
-        console.log()
-        UtilConsole.table(creepRoles, UtilConsole.colors)
+      console.log()
+      UtilConsole.plot(Memory.graphs["creeps"], {
+        unit: "creeps",
+        unitScale: 0,
+        height: 4,
+        colors: UtilConsole.colors,
+        alternate: true,
       })
+      console.log()
+    })
   }
 
   if(Memory.debug.performance.depth > 0) {

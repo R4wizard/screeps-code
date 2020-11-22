@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "watch": "nodemon -w src --exec grunt --verbose"
+    "watch": "nodemon -w src --exec grunt"
   },
   "dependencies": {
     "grunt": "^1.3.0",

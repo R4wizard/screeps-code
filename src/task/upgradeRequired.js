@@ -1,15 +1,11 @@
 import Export from 'util.export'
-import { FindEnergyStorageOrSource } from 'util.find'
-import RoleBaseAToB from 'role.base.atob'
+import TaskBaseAToB from 'task.base.atob'
+import ControllerRoom from 'controller.room'
 
-class RoleUpgrader extends RoleBaseAToB {
+class TaskUpgradeRequired extends TaskBaseAToB {
 
   static selectSource(fsm) {
-    return FindEnergyStorageOrSource(fsm.ctx.room)
-  }
-
-  static selectDest(fsm) {
-    return fsm.ctx.room.controller
+    return ControllerRoom.findEnergy(fsm.ctx.room)
   }
 
   static handleCollect(fsm, target) {
@@ -24,4 +20,4 @@ class RoleUpgrader extends RoleBaseAToB {
 
 }
 
-export default Export(RoleUpgrader)
+export default Export(TaskUpgradeRequired)
